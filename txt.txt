@@ -1,0 +1,80 @@
+Create lambda
+Number of lambdas: 1
+
+handler: 'index.handler', 
+code:    new AssetCode('dist/src') !!!!!
+
+Number of resources:  4 (incl root)
+Number of routes:     8
+
+What are the routes = resources + what are the methods for every resource: 
+1)  /v1
+2)  /v1/open        GET, POST, PATCH, DELETE        patch=update
+3)  /v1/secure      POST
+4)  /v1/secure/id   GET, DELETE, PATCH              patch=update
+
+!!! How to think? 
+
+What is the difference between all the methods? 
+
+['GET', 'POST', 'PATCH', 'DELETE'].map((method) => {
+      openResource.addMethod(method, integraton, {
+        operationName: `${method} Open Resource`,
+        //
+        apiKeyRequired                                              X
+        requestValidator                                            X
+        requestModels                                               X
+        requestParameters                                           X
+      });
+    });
+
+['POST'].map((method) => {
+      secureResource.addMethod(method, integraton, {
+        operationName: `${method} Secure Resource`,
+        apiKeyRequired: true,
+        //
+        requestValidator: bodyValidator,                            !!
+        requestModels: { 'application/json': model },
+        requestParameters:                                          X
+      });
+    });
+
+['GET', 'DELETE'].map((method) => {
+      paramResource.addMethod(method, integraton, {
+        operationName: `${method} Secure Resource`,
+        apiKeyRequired: true,
+        //
+        requestValidator: paramValidator,                          !!
+        // requestModels:                                           X
+        requestParameters: { 'method.request.path.param': true },
+      });
+    });
+
+['PATCH'].map((method) => {
+      paramResource.addMethod(method, integraton, {
+        operationName: `${method} Secure Resource`,
+        apiKeyRequired: true,
+        //
+        requestValidator: bodyAndParamValidator,                    !!
+        requestModels: { 'application/json': model },
+        requestParameters: { 'method.request.path.param': true },
+      });
+    });
+
+Authentication: apiKey
+
+Input validation:
+1) validators (3)
+-  body, param, body and params
+
+2) model
+-  how should a request looks like
+-  which keys should the request contain? 
+
+
+
+Deploy: 
+
+1)  yarn build 
+2)  cdk deploy
+
